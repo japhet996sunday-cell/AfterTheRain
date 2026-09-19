@@ -1,0 +1,70 @@
+name: AfterTheRain C++ Check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  cpp-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check C++ and header files
+        shell: bash
+        run: |
+          set -e
+
+          files=$(find Source -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.cs" \) | sort)
+
+          test -n "$files"
+
+          echo "Checking source files:"
+          echo "$files"
+
+          while IFS= read -r file; do
+            test -s "$file"
+
+            if grep -q $'\0' "$file"; then
+              echo "ERROR: Null byte found in $file"
+              exit 1
+            fi
+          done <<< "$files"
+
+          echo "✓ All C++/header/build-rule files are non-empty and text-readable"
+
+      - name: Check Unreal reflection macros
+        shell: bash
+        run: |
+          set -e
+
+          if grep -RInE 'UCLASS|USTRUCT|UENUM|UINTERFACE|UPROPERTY|UFUNCTION' Source/AfterTheRain --include="*.h" >/dev/null; then
+            echo "✓ Unreal reflection macros found"
+          else
+            echo "ERROR: No Unreal reflection macros found"
+            exit 1
+          fi
+
+      - name: Check generated Unreal folders are absent
+        shell: bash
+        run: |
+          set -e
+
+          for dir in Binaries Build DerivedDataCache Intermediate Saved; do
+            if [ -d "$dir" ]; then
+              echo "ERROR: Generated folder found: $dir"
+              exit 1
+            fi
+          done
+
+          echo "✓ No generated Unreal folders found"
+
+      - name: C++ check passed
+        run: echo "✓ AfterTheRain C++ source check passed"
