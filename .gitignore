@@ -1,0 +1,27 @@
+# Unreal Engine generated/build artifacts — never commit these.
+Binaries/
+Build/
+DerivedDataCache/
+Intermediate/
+Saved/
+.vs/
+.vscode/
+*.VC.db
+*.opensdf
+*.sdf
+*.sln
+*.suo
+*.xcodeproj
+*.xcworkspace
+
+# Editor-generated
+*.tmp
+*.log
+
+# Platform build outputs
+Android/
+iOS/
+
+# Do NOT ignore:
+# Content/ (binary .uasset/.umap — usually Git LFS tracked, see .gitattributes)
+# Source/, Config/, Docs/, this .uproject

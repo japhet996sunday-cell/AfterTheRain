@@ -1,0 +1,19 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "5.4",
+	"Category": "",
+	"Description": "After the Rain - Cinematic interactive romance/mystery drama (working title)",
+	"Modules": [
+		{
+			"Name": "AfterTheRain",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{ "Name": "ModelingToolsEditorMode", "Enabled": false },
+		{ "Name": "LevelSequenceEditor", "Enabled": true },
+		{ "Name": "EnhancedInput", "Enabled": true }
+	],
+	"TargetPlatforms": [ "Windows", "Android", "IOS", "Mac", "Linux" ]
+}
