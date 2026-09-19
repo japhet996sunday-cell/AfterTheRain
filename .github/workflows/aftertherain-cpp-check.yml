@@ -31,14 +31,25 @@ jobs:
 
           while IFS= read -r file; do
             test -s "$file"
-
-            if grep -q $'\0' "$file"; then
-              echo "ERROR: Null byte found in $file"
-              exit 1
-            fi
           done <<< "$files"
 
-          echo "✓ All C++/header/build-rule files are non-empty and text-readable"
+          python3 - <<'PY'
+          from pathlib import Path
+
+          files = sorted(
+              p for p in Path("Source").rglob("*")
+              if p.is_file() and p.suffix in {".cpp", ".h", ".cs"}
+          )
+
+          for path in files:
+              data = path.read_bytes()
+              if b"\x00" in data:
+                  print(f"ERROR: Null byte found in {path}")
+                  raise SystemExit(1)
+
+          print("✓ No null bytes found in C++/header/build-rule files")
+          print("✓ All C++/header/build-rule files are non-empty and text-readable")
+          PY
 
       - name: Check Unreal reflection macros
         shell: bash
