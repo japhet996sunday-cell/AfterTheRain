@@ -1,0 +1,83 @@
+name: AfterTheRain Sanity Check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  sanity-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify Unreal project file
+        run: |
+          test -f AfterTheRain.uproject
+          echo "✓ AfterTheRain.uproject found"
+
+      - name: Verify required directories
+        run: |
+          test -d Config
+          test -d Content
+          test -d Docs
+          test -d Source
+          test -d Source/AfterTheRain
+          echo "✓ Required project directories found"
+
+      - name: Verify required configuration files
+        run: |
+          test -f Config/DefaultEngine.ini
+          test -f Config/DefaultGame.ini
+          test -f Config/DefaultInput.ini
+          echo "✓ Required configuration files found"
+
+      - name: Verify Unreal C++ module files
+        run: |
+          test -f Source/AfterTheRain/AfterTheRain.Build.cs
+          test -f Source/AfterTheRain/AfterTheRain.cpp
+          test -f Source/AfterTheRain/AfterTheRain.h
+          echo "✓ Core Unreal C++ module files found"
+
+      - name: Check for generated Unreal folders
+        run: |
+          forbidden=0
+
+          for dir in Binaries Build DerivedDataCache Intermediate Saved; do
+            if [ -d "$dir" ]; then
+              echo "ERROR: Generated folder found: $dir"
+              forbidden=1
+            fi
+          done
+
+          if [ "$forbidden" -ne 0 ]; then
+            exit 1
+          fi
+
+          echo "✓ No forbidden generated Unreal folders found"
+
+      - name: Check Git LFS configuration
+        run: |
+          test -f .gitattributes
+          grep -q 'filter=lfs' .gitattributes
+          echo "✓ Git LFS configuration found"
+
+      - name: Check project file syntax
+        run: |
+          python3 - <<'PY'
+          import json
+
+          with open("AfterTheRain.uproject", "r", encoding="utf-8") as f:
+              json.load(f)
+
+          print("✓ AfterTheRain.uproject is valid JSON")
+          PY
+
+      - name: Sanity check passed
+        run: echo "✓ AfterTheRain repository sanity check passed"
